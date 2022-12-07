@@ -90,14 +90,17 @@ void FIFO(PAGE **List, int *n, int *m, char *f_list, int *f_num)
             List[j][i] = List[j][i - 1];                                        // copy frame from the last time in queue
             if (List[j][i - 1].blank || List[j][i].number == List[0][i].number) // check if page is blank or equal
             {
-                found = 1;
-                if (List[j][i].blank)
+                if (List[j][i].blank && found == 1) // stop when meet blank and already found
                 {
-                    List[j][i] = List[0][i];
+                    break;
+                }
+                else if (List[j][i].blank)
+                {
                     f_list[i] = '*';
                     (*f_num)++;
-                    break; // if blank break because there is no more page in queue to copy
                 }
+                List[j][i] = List[0][i];
+                found = 1;
             }
         }
         if (!found) // if not found replace the page at head of queue
