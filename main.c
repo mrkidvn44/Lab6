@@ -91,7 +91,7 @@ void FIFO(PAGE **List, int *n, int *m, char *f_list, int *f_num)
             if (List[j][i - 1].blank || List[j][i].number == List[0][i].number) // check if page is blank or equal
             {
                 found = 1;
-                if (List[j][i - 1].blank)
+                if (List[j][i].blank)
                 {
                     List[j][i] = List[0][i];
                     f_list[i] = '*';
@@ -118,6 +118,12 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
 {
     List[1][0] = List[0][0];
     f_list[0] = '*';
+    for (int k = 1; k < *n; k++)
+        if (List[1][0].number == List[0][k].number) // update the next page with the same number
+        {
+            List[1][0].next = k;
+            break;
+        }
     *f_num = 1;
     for (int i = 1; i < *n; i++)
     {
@@ -125,19 +131,25 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
         for (int j = 1; j < *m; j++)
         {
             List[j][i] = List[j][i - 1];
-            for (int k = i; k < *n; k++)
-                if (List[j][i].number == List[0][k].number) // update the next page with the same number
-                    List[j][i].next = k;
-            if (List[j][i - 1].blank || List[j][i].number == List[0][i].number)
+            if (List[j][i].blank || List[j][i].number == List[0][i].number)
             {
-                found = 1;
-                List[j][i] = List[0][i];
-                if (List[j][i - 1].blank)
+                if (List[j][i].blank && found == 1)
+                {
+                    break;
+                }
+                else if (List[j][i].blank)
                 {
                     f_list[i] = '*';
                     (*f_num)++;
-                    break;
                 }
+                List[j][i] = List[0][i];
+                for (int k = i + 1; k < *n; k++)
+                    if (List[j][i].number == List[0][k].number) // update the next page with the same number
+                    {
+                        List[j][i].next = k;
+                        break;
+                    }
+                found = 1;
             }
         }
         if (!found)
@@ -169,14 +181,17 @@ void LRU(PAGE **List, int *n, int *m, char *f_list, int *f_num)
             List[j][i].wait++; // increment waiting time queue by 1
             if (List[j][i - 1].blank || List[j][i].number == List[0][i].number)
             {
-                found = 1;
-                List[j][i] = List[0][i];
-                if (List[j][i - 1].blank)
+                if (List[j][i].blank && found == 1)
+                {
+                    break;
+                }
+                else if (List[j][i].blank)
                 {
                     f_list[i] = '*';
                     (*f_num)++;
-                    break;
                 }
+                List[j][i] = List[0][i];
+                found = 1;
             }
         }
         if (!found)
