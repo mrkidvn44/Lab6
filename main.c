@@ -159,6 +159,12 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
                 if (List[cur_max][i].next < List[j][i].next)
                     cur_max = j;
             List[cur_max][i] = List[0][i];
+            for (int k = i + 1; k < *n; k++)
+                if (List[cur_max][i].number == List[0][k].number) // update the next page with the same number
+                {
+                    List[cur_max][i].next = k;
+                    break;
+                }
             (*f_num)++;
             f_list[i] = '*';
         }
