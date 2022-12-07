@@ -25,8 +25,8 @@ void init_defaut(PAGE **List, int *n, char **f_list)
     {
         PAGE temp;
         temp.number = df_list[i];
-        temp.blank = temp.wait = 0;
-        temp.next = *n;
+        temp.blank = temp.wait = 0; // init wait time at 0;
+        temp.next = *n;             // init next at the end, out of list
         (*List)[i] = temp;
         (*f_list)[i] = ' ';
     }
@@ -66,28 +66,29 @@ void table_init(PAGE ***out_list, PAGE *List, int *n, int *m)
     for (int i = 0; i < *n; i++)
     {
         PAGE blank;
-        blank.blank = 1;
+        blank.blank = 1; // blank page is set at 1
         (*out_list)[0][i] = List[i];
         for (int j = 1; j < *m; j++)
-            (*out_list)[j][i] = blank;
+            (*out_list)[j][i] = blank; // all page in queue from row 1 to n-1 is blank at first
     }
 }
 
 // first come first serve
+// optimize this
 
 void FIFO(PAGE **List, int *n, int *m, char *f_list, int *f_num)
 {
-    List[1][0] = List[0][0];
-    f_list[0] = '*';
-    int cur_q = 1;
+    List[1][0] = List[0][0]; // first page always fault
+    f_list[0] = '*';         // f_list store where fault happened to pirnt
+    int cur_q = 1;           // cur_q is the first page at the head of queue
     *f_num = 1;
-    for (int i = 1; i < *n; i++)
+    for (int i = 1; i < *n; i++) // for loop goes through every page at index[0][i]
     {
-        bool found = 0;
+        bool found = 0; // flag found to check if there already the page in queue
         for (int j = 1; j < *m; j++)
         {
-            List[j][i] = List[j][i - 1];
-            if (List[j][i - 1].blank || List[j][i].number == List[0][i].number)
+            List[j][i] = List[j][i - 1];                                        // copy frame from the last time in queue
+            if (List[j][i - 1].blank || List[j][i].number == List[0][i].number) // check if page is blank or equal
             {
                 found = 1;
                 if (List[j][i - 1].blank)
@@ -95,18 +96,18 @@ void FIFO(PAGE **List, int *n, int *m, char *f_list, int *f_num)
                     List[j][i] = List[0][i];
                     f_list[i] = '*';
                     (*f_num)++;
-                    break;
+                    break; // if blank break because there is no more page in queue to copy
                 }
             }
         }
-        if (!found)
+        if (!found) // if not found replace the page at head of queue
         {
             List[cur_q][i] = List[0][i];
             f_list[i] = '*';
-            cur_q++;
+            cur_q++; // increment cur_q by 1
             (*f_num)++;
         }
-        if (cur_q >= *m)
+        if (cur_q >= *m) // check if the cur_q loop back
             cur_q = 1;
     }
 }
@@ -125,7 +126,7 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
         {
             List[j][i] = List[j][i - 1];
             for (int k = i; k < *n; k++)
-                if (List[j][i].number == List[0][k].number)
+                if (List[j][i].number == List[0][k].number) // update the next page with the same number
                     List[j][i].next = k;
             if (List[j][i - 1].blank || List[j][i].number == List[0][i].number)
             {
@@ -141,7 +142,7 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
         }
         if (!found)
         {
-            int cur_max = 1;
+            int cur_max = 1; // find max in the queue
             for (int j = 2; j < *m; j++)
                 if (List[cur_max][i].next < List[j][i].next)
                     cur_max = j;
@@ -165,7 +166,7 @@ void LRU(PAGE **List, int *n, int *m, char *f_list, int *f_num)
         for (int j = 1; j < *m; j++)
         {
             List[j][i] = List[j][i - 1];
-            List[j][i].wait++;
+            List[j][i].wait++; // increment waiting time queue by 1
             if (List[j][i - 1].blank || List[j][i].number == List[0][i].number)
             {
                 found = 1;
@@ -181,7 +182,7 @@ void LRU(PAGE **List, int *n, int *m, char *f_list, int *f_num)
         if (!found)
         {
             int cur_max = 1;
-            for (int j = 2; j < *m; j++)
+            for (int j = 2; j < *m; j++) // find max wait time in queue
                 if (List[cur_max][i].wait < List[j][i].wait)
                     cur_max = j;
             List[cur_max][i] = List[0][i];
