@@ -118,15 +118,16 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
 {
     List[1][0] = List[0][0];
     f_list[0] = '*';
-    for (int k = 1; k < *n; k++)
-        if (List[1][0].number == List[0][k].number) // update the next page with the same number
-        {
-            List[1][0].next = k;
-            break;
-        }
+    int rp_page = 1; // store the replaced page
     *f_num = 1;
     for (int i = 1; i < *n; i++)
     {
+        for (int k = i; k < *n; k++)
+            if (List[rp_page][i - 1].number == List[0][k].number) // update the previous replaced page's next value
+            {
+                List[rp_page][i - 1].next = k;
+                break;
+            }
         bool found = 0;
         for (int j = 1; j < *m; j++)
         {
@@ -143,12 +144,7 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
                     (*f_num)++;
                 }
                 List[j][i] = List[0][i];
-                for (int k = i + 1; k < *n; k++)
-                    if (List[j][i].number == List[0][k].number) // update the next page with the same number
-                    {
-                        List[j][i].next = k;
-                        break;
-                    }
+                rp_page = j;
                 found = 1;
             }
         }
@@ -159,12 +155,7 @@ void OPT(PAGE **List, int *n, int *m, char *f_list, int *f_num)
                 if (List[cur_max][i].next < List[j][i].next)
                     cur_max = j;
             List[cur_max][i] = List[0][i];
-            for (int k = i + 1; k < *n; k++)
-                if (List[cur_max][i].number == List[0][k].number) // update the next page with the same number
-                {
-                    List[cur_max][i].next = k;
-                    break;
-                }
+            rp_page = cur_max;
             (*f_num)++;
             f_list[i] = '*';
         }
