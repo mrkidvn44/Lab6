@@ -25,8 +25,10 @@ void init_defaut(PAGE **List, int *n, char **f_list)
     {
         PAGE temp;
         temp.number = df_list[i];
-        temp.blank = temp.wait = 0; // init wait time at 0;
-        temp.next = *n;             // init next at the end, out of list
+        // init wait time at 0;
+        temp.blank = temp.wait = 0;
+        // init next at the end, out of the list
+        temp.next = *n;             
         (*List)[i] = temp;
         (*f_list)[i] = ' ';
     }
@@ -59,17 +61,19 @@ void init_manual(PAGE **List, int *n, char **f_list)
 
 void table_init(PAGE ***out_list, PAGE *List, int *n, int *m)
 {
-    // viet su ly truoc khi viet ham init nen tao cot truoc dong :v
     (*out_list) = (PAGE **)malloc(sizeof(PAGE *) * (*m));
     for (int i = 0; i < *m; i++)
         (*out_list)[i] = (PAGE *)malloc(sizeof(PAGE) * (*n));
     for (int i = 0; i < *n; i++)
     {
         PAGE blank;
-        blank.blank = 1; // blank page is set at 1
+        // blank page is set at 1
+        blank.blank = 1; 
+        
         (*out_list)[0][i] = List[i];
         for (int j = 1; j < *m; j++)
-            (*out_list)[j][i] = blank; // all page in queue from row 1 to n-1 is blank at first
+            // all page in queue from row 1 to n-1 is blank at first
+            (*out_list)[j][i] = blank; 
     }
 }
 
@@ -78,19 +82,31 @@ void table_init(PAGE ***out_list, PAGE *List, int *n, int *m)
 
 void FIFO(PAGE **List, int *n, int *m, char *f_list, int *f_num)
 {
-    List[1][0] = List[0][0]; // first page always fault
-    f_list[0] = '*';         // f_list store where fault happened to pirnt
-    int cur_q = 1;           // cur_q is the first page at the head of queue
+    // List array stores current pages in each column
+    List[1][0] = List[0][0]; 
+    
+    // f_list array stores where fault happened to print out
+    // first page is always fault
+    f_list[0] = '*';
     *f_num = 1;
-    for (int i = 1; i < *n; i++) // for loop goes through every page at index[0][i]
+    
+    // cur_q variable is the first page at the head of queue
+    int cur_q = 1;           
+    // for loop goes through every page at List[0][i]
+    for (int i = 1; i < *n; i++) 
     {
-        bool found = 0; // flag found to check if there already the page in queue
+        // flag found to check if there already the page in queue
+        bool found = 0; 
         for (int j = 1; j < *m; j++)
         {
-            List[j][i] = List[j][i - 1];                                        // copy frame from the last time in queue
-            if (List[j][i - 1].blank || List[j][i].number == List[0][i].number) // check if page is blank or equal
+            // copy frame from the last time in queue
+            List[j][i] = List[j][i - 1];
+            
+            // check if page is blank or equal
+            if (List[j][i - 1].blank || List[j][i].number == List[0][i].number) 
             {
-                if (List[j][i].blank && found == 1) // stop when meet blank and already found
+                // stop when List[j][i] have met blank and already found
+                if (List[j][i].blank && found == 1) 
                 {
                     break;
                 }
@@ -103,14 +119,18 @@ void FIFO(PAGE **List, int *n, int *m, char *f_list, int *f_num)
                 found = 1;
             }
         }
-        if (!found) // if not found replace the page at head of queue
+        // if the page is not found replace this at the head of the queue
+        if (!found) 
         {
             List[cur_q][i] = List[0][i];
             f_list[i] = '*';
-            cur_q++; // increment cur_q by 1
+            // increment cur_q by 1
+            cur_q++; 
             (*f_num)++;
         }
-        if (cur_q >= *m) // check if the cur_q loop back
+        
+        // check if the cur_q loop back
+        if (cur_q >= *m) 
             cur_q = 1;
     }
 }
